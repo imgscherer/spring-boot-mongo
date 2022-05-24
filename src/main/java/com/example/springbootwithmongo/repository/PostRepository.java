@@ -1,5 +1,6 @@
 package com.example.springbootwithmongo.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -11,10 +12,17 @@ import com.example.springbootwithmongo.domain.Post;
 @Repository
 public interface PostRepository extends MongoRepository<Post, String>{
 	
-	//Query do MongoDB
+	//MongoDB Query
 	@Query("{ 'title': { $regex: ?0, $options: 'i' } }")
 	List<Post> findByTitle(String text);
 
-	//Query do Spring Boot
+	//Spring Boot Query
 	List<Post> findByTitleContainingIgnoreCase(String text);
+	
+	@Query("{ $and: [ { date: {$gte: ?1} }, "
+			+ "{ date: { $lte: ?2} } , "
+			+ "{ $or: [ { 'title': { $regex: ?0, $options: 'i' } }, "
+			+ "{ 'body': { $regex: ?0, $options: 'i' } }, "
+			+ "{ 'comments.text': { $regex: ?0, $options: 'i' } } ] } ] }")
+	List<Post> findSome(String text, Date minDate, Date maxDate);
 }
